@@ -59,10 +59,10 @@ def blur(img, kernel_size=2):
 # if (img is None):
 # 	print("Image not read")
 
-path_new_dataset = 'new/'
-# path_new_dataset = 'new2/'
-path_dataset = 'smallmnist/'
-# path_dataset = 'mnist_png/training/'
+# path_new_dataset = 'new/'
+path_new_dataset = 'new2/'
+# path_dataset = 'smallmnist/'
+path_dataset = 'mnist_png/training/'
 if not os.path.exists(path_new_dataset):
 	os.mkdir(path_new_dataset)
 

@@ -7,16 +7,15 @@ from tfHelper import tfHelper
 import os
 import data
 # import matplotlib
-import matplotlib.pyplot as plt
 
 from PIL import Image
 
 k = tf.keras
 
 tfHelper.log_level_decrease()
-# tfHelper.numpy_show_entire_array(28)
+tfHelper.numpy_show_entire_array(28)
 # np.set_printoptions(threshold='nan', linewidth=114)
-np.set_printoptions(linewidth=114)
+# np.set_printoptions(linewidth=114)
 
 data_augmentation = False
 batch_size = 128
@@ -32,6 +31,7 @@ print ("Load data ...")
 (x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
 # (x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
 (x_test, y_test) = tfHelper.get_dataset_with_folder('mnist_png/testing/', convertColor)
+# exit()
 # X_pred, X_id, label = data.load_data_predict()
 # print(x_train[0])
 # exit(0)
@@ -48,7 +48,7 @@ x_test /= 255
 print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 # print(x_test.shape[0], 'test samples')
-print(x_train[0])
+# print(x_train[0])
 
 # y_train = k.utils.to_categorical(y_train, num_classes)
 # y_test = k.utils.to_categorical(y_test, num_classes)

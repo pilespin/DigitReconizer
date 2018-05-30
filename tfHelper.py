@@ -8,6 +8,8 @@ import os
 
 class tfHelper:
 
+	k = tf.keras
+
 	def __init__():
 		'tfHelper Initialized'
 
@@ -39,7 +41,7 @@ class tfHelper:
 		yaml_file = open(path_yaml, 'r')
 		model_yaml = yaml_file.read()
 		yaml_file.close()
-		model = tf.keras.modelsmodel_from_yaml(model_yaml)
+		model = tf.keras.models.model_from_yaml(model_yaml)
 		print("Loaded model from disk: " + path_yaml)
 		
 		# load weights into new model
@@ -60,33 +62,9 @@ class tfHelper:
 		return (flat_arr)
 
 	@staticmethod
-	def select_output(size, index):
-		if (index < 0):
-			raise Exception("Out of bound index at " + str(index))
-		tmp = np.zeros(size)
-		tmp[index] = 1
-		return (tmp)
-
-	@staticmethod
-	def add_output_to_dataset(Y_train, size, index):
-		if (Y_train is None):
-			Y_train = tfHelper.select_output(size, index)
-		else:
-			Y_train = np.vstack((Y_train, tfHelper.select_output(size, index)))
-		return (Y_train)
-
-	@staticmethod
-	def add_img_to_dataset(X_train, img):
-		if (X_train is None):
-			X_train = np.array(img)
-		else:
-			X_train = np.vstack((X_train, img))
-		return (X_train)
-
-	@staticmethod
 	def get_dataset_with_folder(path, convertColor):
-		X_train = None
-		Y_train = None
+		X_train = []
+		Y_train = []
 
 		for foldername in os.listdir(path):
 			if foldername[0] != '.':
@@ -96,9 +74,10 @@ class tfHelper:
 						path2 = path + foldername + "/" + filename
 						# img = tfHelper.image_to_array_greyscale(path2)
 						img = tfHelper.image_to_array(path2, convertColor)
-						X_train = tfHelper.add_img_to_dataset(X_train, img)
-						Y_train = tfHelper.add_output_to_dataset(Y_train, 10, int(foldername))
-		return (X_train, Y_train)
+						X_train.append(img)
+						Y_train.append(int(foldername))
+		Y_train = tf.keras.utils.to_categorical(Y_train, num_classes=10)
+		return (np.array(X_train), np.array(Y_train))
 
 	@staticmethod
 	def get_dataset_with_once_folder(name, path, convertColor):
@@ -125,7 +104,8 @@ class tfHelper:
 	@staticmethod
 	def numpy_show_entire_array(px):
 		lnbreak = (px + 1) * 4
-		np.set_printoptions(threshold='nan', linewidth=lnbreak)
+		np.set_printoptions(linewidth=lnbreak)
+		# np.set_printoptions(threshold='nan', linewidth=lnbreak)
 
 	@staticmethod
 	def count_elem_in_folder(path):
