@@ -23,26 +23,32 @@ batch_size = 128
 num_classes = 10
 epochs = 100
 imgWidth = 28
-path = './smallmnist/'
+# path = './smallmnist/'
+path = './new/'
 convertColor = 'L'
 
 print ("Load data ...")
-(x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
 # (x_train, y_train), (x_test, y_test) = data.load_data_train()
+(x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
+# (x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
+(x_test, y_test) = tfHelper.get_dataset_with_folder('mnist_png/testing/', convertColor)
 # X_pred, X_id, label = data.load_data_predict()
+# print(x_train[0])
+# exit(0)
+
 
 print(x_train.shape, 'train samples')
 x_train = x_train.reshape(x_train.shape[0], imgWidth, imgWidth, 1)
-# x_test = x_test.reshape(x_test.shape[0], imgWidth, imgWidth, 1)
+x_test = x_test.reshape(x_test.shape[0], imgWidth, imgWidth, 1)
 x_train = x_train.astype('float32')
-# x_test = x_test.astype('float32')
+x_test = x_test.astype('float32')
 x_train /= 255
-# x_test /= 255
+x_test /= 255
 
 print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 # print(x_test.shape[0], 'test samples')
-# print(x_train.shape)
+print(x_train[0])
 
 # y_train = k.utils.to_categorical(y_train, num_classes)
 # y_test = k.utils.to_categorical(y_test, num_classes)
@@ -86,8 +92,8 @@ model.compile(loss='categorical_crossentropy',
 model.fit(x_train, y_train,
           batch_size=batch_size,
           epochs=100,
-          validation_data=(x_train, y_train),
-          # validation_data=(x_test, y_test),
+          # validation_data=(x_train, y_train),
+          validation_data=(x_test, y_test),
           shuffle=True,
           callbacks=[learning_rate_reduction, tensorBoard]
           )
