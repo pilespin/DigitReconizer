@@ -5,5 +5,5 @@ scipy
 seaborn
 pandas
 pillow-pil
-keras
+opencv-python
 tensorflow-gpu

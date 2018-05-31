@@ -17,7 +17,6 @@ tfHelper.numpy_show_entire_array(28)
 # np.set_printoptions(threshold='nan', linewidth=114)
 # np.set_printoptions(linewidth=114)
 
-data_augmentation = False
 batch_size = 128
 num_classes = 10
 epochs = 100
@@ -28,8 +27,8 @@ convertColor = 'L'
 
 print ("Load data ...")
 # (x_train, y_train), (x_test, y_test) = data.load_data_train()
-(x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
-# (x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
+# (x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
+(x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
 (x_test, y_test) = tfHelper.get_dataset_with_folder('mnist_png/testing/', convertColor)
 # exit()
 # X_pred, X_id, label = data.load_data_predict()
@@ -54,25 +53,33 @@ print(x_train.shape[0], 'train samples')
 # y_test = k.utils.to_categorical(y_test, num_classes)
 
 model = k.models.Sequential()
-model.add(k.layers.Conv2D(64, (3, 3), padding='same',
-                 input_shape=(imgWidth,imgWidth,1)))
-model.add(k.layers.Activation('relu'))
-model.add(k.layers.Conv2D(64, (3, 3)))
-model.add(k.layers.Activation('relu'))
-model.add(k.layers.MaxPooling2D(pool_size=(2, 2)))
+model.add(k.layers.Conv2D(16, (3, 3), activation='relu',
+                 input_shape = (imgWidth, imgWidth, 1)))
+model.add(k.layers.BatchNormalization())
+model.add(k.layers.Conv2D(16, (3, 3), activation='relu'))
+model.add(k.layers.BatchNormalization())
+#model.add(k.layers.Conv2D(16, (3, 3), activation='relu'))
+#model.add(k.layers.BatchNormalization())
+model.add(k.layers.MaxPool2D(strides=(2,2)))
 model.add(k.layers.Dropout(0.25))
 
+model.add(k.layers.Conv2D(32, (3, 3), activation='relu'))
+model.add(k.layers.BatchNormalization())
+model.add(k.layers.Conv2D(32, (3, 3), activation='relu'))
+model.add(k.layers.BatchNormalization())
+#model.add(k.layers.Conv2D(filters = 32, (3, 3), activation='relu'))
+#model.add(k.layers.BatchNormalization())
+model.add(k.layers.MaxPool2D(strides=(2,2)))
+model.add(k.layers.Dropout(0.25))
 
 model.add(k.layers.Flatten())
-model.add(k.layers.Dense(512))
-model.add(k.layers.Activation('relu'))
-# model.add(k.layers.Dropout(0.1))
-model.add(k.layers.Dense(80))
-model.add(k.layers.Activation('relu'))
+model.add(k.layers.Dense(512, activation='relu'))
+model.add(k.layers.Dropout(0.3))
+model.add(k.layers.Dense(1024, activation='relu'))
 model.add(k.layers.Dropout(0.5))
-model.add(k.layers.Dense(num_classes))
-model.add(k.layers.Activation('softmax'))
-# initiate RMSprop optimizer
+model.add(k.layers.Dense(10, activation='softmax'))
+
+
 opt = k.optimizers.Adam(lr=1e-04)
 # opt = k.optimizers.Adam(lr=0.0001, decay=1e-6)
 # opt = k.optimizers.rmsprop(lr=0.0001, decay=1e-6)
@@ -89,12 +96,24 @@ model.compile(loss='categorical_crossentropy',
               optimizer=opt,
               metrics=['accuracy'])
 
-model.fit(x_train, y_train,
-          batch_size=batch_size,
+datagen = k.preprocessing.image.ImageDataGenerator( rotation_range=20,
+                                                    width_shift_range=0.1,
+                                                    height_shift_range=0.1,
+                                                    # shear_range=0.2,
+                                                    zoom_range=0.1,
+                                                    # horizontal_flip=True,
+                                                    fill_mode='nearest')
+datagen.fit(x_train)
+
+# model.fit(x_train, y_train,
+model.fit_generator(datagen.flow(x_train, y_train,
+          batch_size=batch_size),
           epochs=100,
           # validation_data=(x_train, y_train),
+          # steps_per_epoch=10,
           validation_data=(x_test, y_test),
-          shuffle=True,
+          # shuffle=True,
           callbacks=[learning_rate_reduction, tensorBoard]
           )
+
 tfHelper.save_model(model, "model")
