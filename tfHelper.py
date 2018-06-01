@@ -25,12 +25,11 @@ class tfHelper:
 		model_yaml = model.to_yaml()
 		with open(path_yaml, "w") as yaml_file:
 			yaml_file.write(model_yaml)
-		# yaml_file.close()
-		print("Saved config to: " + path_yaml)
+		# print("Saved config to: " + path_yaml)
 
 		# serialize weights to HDF5
 		model.save_weights(path_h5)
-		print("Saved weight to: " + path_h5)
+		print("Saved weight to: " + path_h5 + ", Saved config to: " + path_yaml)
 
 	@staticmethod
 	def load_model(path):

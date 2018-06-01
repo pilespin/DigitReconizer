@@ -17,7 +17,7 @@ tfHelper.numpy_show_entire_array(28)
 # np.set_printoptions(threshold='nan', linewidth=114)
 # np.set_printoptions(linewidth=114)
 
-batch_size = 128
+batch_size = 64
 num_classes = 10
 epochs = 100
 imgWidth = 28
@@ -26,10 +26,10 @@ path = './new/'
 convertColor = 'L'
 
 print ("Load data ...")
-# (x_train, y_train), (x_test, y_test) = data.load_data_train()
+(x_train, y_train), (x_test, y_test) = data.load_data_train()
 # (x_train, y_train) = tfHelper.get_dataset_with_folder(path, convertColor)
-(x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
-(x_test, y_test) = tfHelper.get_dataset_with_folder('mnist_png/testing/', convertColor)
+# (x_train, y_train) = tfHelper.get_dataset_with_folder('mnist_png/training/', convertColor)
+# (x_test, y_test) = tfHelper.get_dataset_with_folder('mnist_png/testing/', convertColor)
 # exit()
 # X_pred, X_id, label = data.load_data_predict()
 # print(x_train[0])
@@ -45,42 +45,56 @@ x_train /= 255
 x_test /= 255
 
 print('x_train shape:', x_train.shape)
-print(x_train.shape[0], 'train samples')
+# print(x_train.shape[0], 'train samples')
 # print(x_test.shape[0], 'test samples')
 # print(x_train[0])
 
-# y_train = k.utils.to_categorical(y_train, num_classes)
-# y_test = k.utils.to_categorical(y_test, num_classes)
+y_train = k.utils.to_categorical(y_train, num_classes)
+y_test = k.utils.to_categorical(y_test, num_classes)
+
+# model = tfHelper.load_model("model")
 
 model = k.models.Sequential()
 model.add(k.layers.Conv2D(16, (3, 3), activation='relu',
                  input_shape = (imgWidth, imgWidth, 1)))
 model.add(k.layers.BatchNormalization())
-model.add(k.layers.Conv2D(16, (3, 3), activation='relu'))
+model.add(k.layers.Conv2D(16, (3, 3), activation='relu', padding='same'))
 model.add(k.layers.BatchNormalization())
-#model.add(k.layers.Conv2D(16, (3, 3), activation='relu'))
-#model.add(k.layers.BatchNormalization())
 model.add(k.layers.MaxPool2D(strides=(2,2)))
 model.add(k.layers.Dropout(0.25))
 
-model.add(k.layers.Conv2D(32, (3, 3), activation='relu'))
+model.add(k.layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
 model.add(k.layers.BatchNormalization())
-model.add(k.layers.Conv2D(32, (3, 3), activation='relu'))
+model.add(k.layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
 model.add(k.layers.BatchNormalization())
-#model.add(k.layers.Conv2D(filters = 32, (3, 3), activation='relu'))
-#model.add(k.layers.BatchNormalization())
+model.add(k.layers.MaxPool2D(strides=(2,2)))
+model.add(k.layers.Dropout(0.25))
+
+model.add(k.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+model.add(k.layers.BatchNormalization())
+model.add(k.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+model.add(k.layers.BatchNormalization())
+model.add(k.layers.MaxPool2D(strides=(2,2)))
+model.add(k.layers.Dropout(0.25))
+
+model.add(k.layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
+model.add(k.layers.BatchNormalization())
+model.add(k.layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
+model.add(k.layers.BatchNormalization())
 model.add(k.layers.MaxPool2D(strides=(2,2)))
 model.add(k.layers.Dropout(0.25))
 
 model.add(k.layers.Flatten())
-model.add(k.layers.Dense(512, activation='relu'))
-model.add(k.layers.Dropout(0.3))
 model.add(k.layers.Dense(1024, activation='relu'))
-model.add(k.layers.Dropout(0.5))
+model.add(k.layers.Dropout(0.2))
+model.add(k.layers.Dense(1024, activation='relu'))
+model.add(k.layers.Dropout(0.2))
+model.add(k.layers.Dense(100, activation='relu'))
+model.add(k.layers.Dropout(0.2))
 model.add(k.layers.Dense(10, activation='softmax'))
 
 
-opt = k.optimizers.Adam(lr=1e-04)
+opt = k.optimizers.Adam(lr=1e-10)
 # opt = k.optimizers.Adam(lr=0.0001, decay=1e-6)
 # opt = k.optimizers.rmsprop(lr=0.0001, decay=1e-6)
 
@@ -106,14 +120,17 @@ datagen = k.preprocessing.image.ImageDataGenerator( rotation_range=20,
 datagen.fit(x_train)
 
 # model.fit(x_train, y_train,
-model.fit_generator(datagen.flow(x_train, y_train,
-          batch_size=batch_size),
-          epochs=100,
-          # validation_data=(x_train, y_train),
-          # steps_per_epoch=10,
-          validation_data=(x_test, y_test),
-          # shuffle=True,
-          callbacks=[learning_rate_reduction, tensorBoard]
-          )
+for i in range(epochs):
+    print("Epoch " + str(i) + '/' + str(epochs))
+    model.fit_generator(datagen.flow(x_train, y_train,
+            batch_size=batch_size),
+            epochs=1,
+            # validation_data=(x_train, y_train),
+            # steps_per_epoch=10,
+            validation_data=(x_test, y_test),
+            # shuffle=True,
+            verbose=1,
+            callbacks=[learning_rate_reduction, tensorBoard]
+            )
 
-tfHelper.save_model(model, "model")
+    tfHelper.save_model(model, "model")

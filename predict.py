@@ -1,12 +1,13 @@
 
 import numpy as np
-from KerasHelper import KerasHelper
+from tfHelper import tfHelper
 import data
 
-KerasHelper.log_level_decrease()
-# KerasHelper.numpy_show_entire_array(28)
+tfHelper.log_level_decrease()
+# tfHelper.numpy_show_entire_array(28)
 
 
+print ("Load data ...")
 X_pred, X_id, label = data.load_data_predict()
 
 X_pred = X_pred.reshape(X_pred.shape[0], 28, 28, 1)
@@ -15,7 +16,7 @@ X_pred = X_pred.astype('float32')
 X_pred /= 255
 
 
-model = KerasHelper.load_model("model")
+model = tfHelper.load_model("model")
 
 ######################### Predict #########################
 predictions = model.predict(X_pred)
